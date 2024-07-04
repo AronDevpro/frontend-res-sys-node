@@ -336,7 +336,7 @@ function OrderPage() {
                     </TableContainer>
                     }
 
-                    <Typography id="modal-modal-title" variant="h4" component="h2" align="center" marginY={2}>
+                    <Typography variant="h4" component="h2" align="center" marginY={2}>
                         Total : {calculateTotal()}
                     </Typography>
                     <Stack direction="row" justifyContent="right" gap={2}>

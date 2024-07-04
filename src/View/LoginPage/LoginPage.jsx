@@ -1,15 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import {Box, Button, Stack, TextField, Typography} from "@mui/material";
+import  {useEffect, useState} from 'react';
+import {Alert, Box, Button, Stack, TextField, Typography} from "@mui/material";
 import {Container} from "@mui/system";
-import axios from "axios";
-import {user} from "../../utils/Server.js";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
-import {login} from "../../Redux/Reducers/loginReducer.js";
+import {login} from "../../Redux/Features/login.js";
+import Loading from "../../Component/Loading.jsx";
 
 function LoginPage() {
     const dispatch = useDispatch();
-    const logUser = useSelector(state => state.login);
+    const token = useSelector(state => state.login.token);
     const navigate = useNavigate();
 
     const [userData,setUserData] = useState({
@@ -24,28 +23,36 @@ function LoginPage() {
             [name]: value,
         }))
     }
-    function loginUser() {
-        axios.post(`${user}/login`, userData).then((r) => {
-            if (r.status === 201) {
-                console.log(r.data)
-                dispatch(login());
-                localStorage.setItem("isAuthenticated", logUser.isAuthenticated);
-                localStorage.setItem("token", r.data.Token);
-                navigate("/");
-            }
-        }).catch((err) => {
-            console.log(err.message);
-        });
-    }
+    const loading = useSelector((state) => state.login.loading);
+    const error = useSelector((state) => state.login.error);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        dispatch(login(userData));
+    };
+
+
+    // function loginUser() {
+    //     axios.post(`${user}/login`, userData).then((r) => {
+    //         if (r.status === 201) {
+    //             console.log(r.data)
+    //             dispatch(login());
+    //             localStorage.setItem("isAuthenticated", logUser.isAuthenticated);
+    //             localStorage.setItem("token", r.data.Token);
+    //             navigate("/");
+    //         }
+    //     }).catch((err) => {
+    //         console.log(err.message);
+    //     });
+    // }
 
     useEffect(() => {
-        const isAuthenticated = localStorage.getItem("isAuthenticated");
-        if (isAuthenticated){
+        if (token){
             navigate("/");
         }
-    }, [navigate]);
+    }, [navigate, token]);
 
-    return (
+    return (loading ? <Loading /> : (
         <Container>
             <Typography
                 variant="h2"
@@ -62,15 +69,18 @@ function LoginPage() {
             >
                 Login
             </Typography>
+
             <Box paddingY={5} marginY={4} alignContent="center" align="center">
                 <Stack gap={2} width={500} alignItems="center">
+                    {error && <Alert severity="error" sx={{marginBottom:1}}>{error}</Alert>}
                 <TextField name="email" label="E-mail" variant="outlined" type="email" fullWidth onChange={handleChange}/>
                 <TextField name="password" label="password" variant="outlined" type="password" fullWidth onChange={handleChange}/>
-                    <Button variant="contained" onClick={loginUser}>Login</Button>
+                    <Button variant="contained" onClick={handleSubmit}>Login</Button>
                 </Stack>
             </Box>
         </Container>
-    );
+    )
+);
 }
 
 export default LoginPage;
